@@ -1,29 +1,33 @@
-import os
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import plotly.express as px
+import covid
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-server = app.server
+# assume you have a "wide-form" data frame with no index
+# see https://plotly.com/python/wide-form/ for more options
 
-app.layout = html.Div([
-    html.H2('Hello World'),
-    dcc.Dropdown(
-        id='dropdown',
-        options=[{'label': i, 'value': i} for i in ['LA', 'NYC', 'MTL']],
-        value='LA'
+
+app.layout = html.Div(children=[
+    html.H1(children='Coronavirus Network Analysis of US News'),
+
+    dcc.Graph(
+        id='us',
+        figure=covid.network_graph("us")
     ),
-    html.Div(id='display-value')
-])
 
-@app.callback(dash.dependencies.Output('display-value', 'children'),
-              [dash.dependencies.Input('dropdown', 'value')])
-def display_value(value):
-    return 'You have selected "{}"'.format(value)
+    html.H1(children='Coronavirus Network Analysis of Korean News'),
+
+    dcc.Graph(
+        id='kor',
+        figure=covid.network_graph("kor")
+    )
+])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
