@@ -12,6 +12,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 # assume you have a "wide-form" data frame with no index
 # see https://plotly.com/python/wide-form/ for more options
 
+server = app.server # the Flask app
 
 app.layout = html.Div(children=[
     html.H1(children='Coronavirus Network Analysis of US News'),
