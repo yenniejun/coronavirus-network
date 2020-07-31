@@ -1,6 +1,8 @@
 # Coronavirus Network Analysis
 This project looks at coronavirus news in several languages, performing topic modeling, and network analysis.
 
+App can be found [here](https://coronavirus-network.herokuapp.com)
+
 US News
 * Over 60,000 news articles 
 * Search terms: "coronavirus", "covid"
@@ -38,6 +40,7 @@ git push heroku master
 ```
 
 # Tools used
-* [Dash](https://dash.plotly.com/deployment)
+* [Dash](https://dash.plotly.com/deployment) and PlotLy
 * NetworkX
+* Heroku
 
