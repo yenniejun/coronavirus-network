@@ -58,7 +58,7 @@ def make_node_trace():
             size=[],
             colorbar=dict(
                 thickness=15,
-                title='Node Connections',
+                title='Node Frequency',
                 xanchor='left',
                 titleside='right'
             ),
