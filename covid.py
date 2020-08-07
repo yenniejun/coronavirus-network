@@ -3,6 +3,7 @@ import networkx as nx
 import re
 import plotly.graph_objects as go
 import math
+import ast
 
 def list_flatten(l, a=None):
     #check a
@@ -75,22 +76,31 @@ def network_graph(country):
     nodelist = pd.read_csv(f"data/{country}_nodelist.csv")
     nodelist.drop(columns="Unnamed: 0", inplace=True)
 
-    graph = nx.Graph()
-    edges = edgelist[:50]
+    # Topic seventyfive is contact tracing
+    seventyfive = edgelist[edgelist['node1'] == "Topic75"]
+    seventyfive = seventyfive.append(edgelist[edgelist['node2'] == "Topic75"])
+    seventyfive = seventyfive.sort_values(by="weight", ascending = False)
+
+    edges = seventyfive[:20]
+
 
     # get the list of nodes/topics
     topics = list(set(list_flatten(edges[['node1', 'node2']].values.tolist())))
+    topics.remove("Topic75")
+    topics.insert(0, "Topic75")
 
     # dictionary mapping topic to name
     topic_name_dict = nodelist[nodelist.topic.isin(topics)]
+    topic_name_dict["label"] = topic_name_dict.label.apply(lambda a: ast.literal_eval(a))
+
+
+    graph = nx.star_graph(topics)
+    pos_ = nx.spring_layout(graph)
 
     # add edges and weights
     for index, value in edges.iterrows():
         graph.add_edge(value['node1'], value['node2'], weight=value['weight'])
         
-    # position the nodes in the graph. can use different layout
-    pos_ = nx.shell_layout(graph)
-
     # The annoying workaround to show the labels on the lines
     # https://stackoverflow.com/questions/46037897/line-hover-text-in-plotly
     middle_node_trace = make_middle_node_trace()
@@ -102,16 +112,17 @@ def network_graph(country):
         char_2 = edge[1]
         x0, y0 = pos_[char_1]
         x1, y1 = pos_[char_2]
-        
+
         weight = graph.edges()[edge]['weight']
-        
+
         text = str(weight) + " [" + char_1 + '-' + char_2 + "]"
-    #     print(text)
+        #     print(text)
 
         trace = make_edge([x0, x1, None], [y0, y1, None], text, 
-                           width = math.log2(weight/1000))
+                          width = weight/400)
+        #                        width = math.log2(weight/1000))
         edge_trace.append(trace)
-        
+
         middle_node_trace['x'] += tuple([(x0+x1)/2])
         middle_node_trace['y'] += tuple([(y0+y1)/2])
         middle_node_trace['text'] +=  tuple([text])
@@ -121,7 +132,7 @@ def network_graph(country):
     # For each node, get the position and size and add to the node_trace
     for node in graph.nodes():
         x, y = pos_[node]
-        nodesize = nodelist.loc[nodelist['topic'] == node]['totalcount'].values[0]/180
+        nodesize = math.log(nodelist.loc[nodelist['topic'] == node]['totalcount'].values[0]) * 5
         node_trace['x'] += tuple([x])
         node_trace['y'] += tuple([y])
         nodename = re.search('\d+', node).group()
@@ -133,13 +144,15 @@ def network_graph(country):
     node_annotations = []
 
     for node,adjacencies in enumerate(graph.adjacency()):
-        node_adjacencies.append(len(adjacencies[1]))
+        nodesize = nodelist.loc[nodelist['topic'] == "Topic"+str(node)]['totalcount'].values[0]
+        node_adjacencies.append(nodesize)
 
         topic_info = topic_name_dict[topic_name_dict['topic'] == adjacencies[0]]
-        topic_label = ' '.join(topic_info.label.values[0].split()[0:3]) # Just the first 3
+        topic_label = topic_info.label.values[0][0:8] # Just the first 4
+        topic_label = ' '.join(["-".join(topic_label[i:i+2]) for i in range(0, len(topic_label), 2)])
 
-        node_text.append(topic_label + " (" + str(len(adjacencies[1])) + " connections)")
 
+        node_text.append(topic_label)
         nodename = re.search('\d+', adjacencies[0]).group()
 
         node_annotations.append(

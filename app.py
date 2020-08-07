@@ -22,12 +22,12 @@ app.layout = html.Div(children=[
         figure=covid.network_graph("us")
     ),
 
-    html.H1(children='Coronavirus Network Analysis of Korean News'),
+    # html.H1(children='Coronavirus Network Analysis of Korean News'),
 
-    dcc.Graph(
-        id='kor',
-        figure=covid.network_graph("kor")
-    )
+    # dcc.Graph(
+    #     id='kor',
+    #     figure=covid.network_graph("kor")
+    # )
 ])
 
 if __name__ == '__main__':
