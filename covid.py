@@ -70,7 +70,7 @@ def make_node_trace():
     )
 
 
-def network_graph(country):
+def network_graph(country, slider_value):
     edgelist = pd.read_csv(f"data/{country}_edgelist_weight.csv")
     edgelist.drop(columns="Unnamed: 0", inplace=True)
     nodelist = pd.read_csv(f"data/{country}_nodelist.csv")
@@ -81,7 +81,7 @@ def network_graph(country):
     seventyfive = seventyfive.append(edgelist[edgelist['node2'] == "Topic75"])
     seventyfive = seventyfive.sort_values(by="weight", ascending = False)
 
-    edges = seventyfive[:20]
+    edges = seventyfive[:slider_value]
 
 
     # get the list of nodes/topics
